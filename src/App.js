@@ -1,49 +1,69 @@
 import './App.css';
-import { TextareaAutosize } from '@mui/base';
 import Button from '@mui/material/Button';
 
 import {useState} from "react";
-import {Input, TextField} from "@mui/material";
+import {TextField} from "@mui/material";
 
 function App() {
 
     const [calc, setCalc] = useState("");
     const [result, setResult] = useState("");
     const [fullHistory, historySaver] = useState("");
-    const [debugValue, debugSaver] = useState("");
 
 
     const ops = ['/', '*', '+', '-'];
     const updateCalc = value => {
-        if (ops.includes(value) && ops.includes(calc.slice(-1))) {
+        let valueIsOperation = ops.includes(value);
+        if (valueIsOperation && ops.includes(calc.slice(-1))) {
             setCalc(calc.replace(calc.slice(-1), value));
             return;
         }
-        if (ops.includes(value) && calc === '') {
+        if (valueIsOperation) {
+            for (let i = 0; i < ops.length; i++) {
+                if (calc.includes(ops[i])) {
+                    calculateWithOperation(value);
+                    return;
+                }
+            }
+        }
+        if (valueIsOperation && calc === '') {
             return;
         }
 
         setCalc(calc + value);
-        if (!ops.includes(value)) setResult(eval(calc + value).toString());
+        if (!valueIsOperation) setResult(eval(calc + value).toString());
     }
 
     const createDigits = () => {
         const digits = [];
 
         for (let i = 0; i < 10; i++) {
-            digits.push(<button
-                onClick={() => updateCalc(i.toString())}
-                key={i}>
+            digits.push(<Button variant="contained"
+                                onClick={() => updateCalc(i.toString())}
+                                key={i}>
                 {i}
-            </button>)
+            </Button>)
         }
         return digits;
     }
 
     const calculate = () => {
-        historySaver(fullHistory.concat(" \n ")
-            .concat(calc))
-        setCalc(eval(calc).toString());
+        let isOnlyNumbersInString = /^\d+$/.test(calc);
+        if (isOnlyNumbersInString || ops.includes(calc.slice(-1)) || calc.length === 0)
+            return;
+        historySaver(fullHistory.concat(calc)
+            .concat(" = ")
+            .concat(result)
+            .concat("\n"))
+        setCalc(result);
+    }
+
+    const calculateWithOperation = (operation) => {
+        historySaver(fullHistory.concat(calc)
+            .concat(" = ")
+            .concat(result)
+            .concat("\n"))
+        setCalc(result.concat(operation));
     }
 
     return (<div className="App">
@@ -64,7 +84,7 @@ function App() {
                 {createDigits()}
             </div>
             <div className="calcHistory">
-                <TextField value={fullHistory}>
+                <TextField value={fullHistory} multiline={true}>
                     {fullHistory}
                 </TextField>
             </div>
