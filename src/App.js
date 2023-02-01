@@ -38,11 +38,12 @@ function App() {
         const digits = [];
 
         for (let i = 0; i < 10; i++) {
-            digits.push(<Button variant="contained"
-                                onClick={() => updateCalc(i.toString())}
-                                key={i}>
-                {i}
-            </Button>)
+            digits.push(
+                <Button variant="contained"
+                        onClick={() => updateCalc(i.toString())}
+                        key={i}>
+                    {i}
+                </Button>)
         }
         return digits;
     }
@@ -66,6 +67,24 @@ function App() {
         setCalc(result.concat(operation));
     }
 
+    //second task
+
+    const handleClick = async () => {
+
+            const response = await fetch("http://localhost:8080/math/examples?count=4")
+                .then((response) => response.json())
+            let allOperationInString ='';
+            for (let i = 0; i < response.length; i++) {
+                let calculationTwoNumbers = eval(response[i])
+                allOperationInString = allOperationInString.concat(response[i])
+                    .concat(" = ")
+                    .concat(calculationTwoNumbers)
+                    .concat("\n")
+            }
+            historySaver(fullHistory.concat(allOperationInString))
+    };
+
+
     return (<div className="App">
         <div className="calculator">
             <div className="display">
@@ -88,6 +107,9 @@ function App() {
                     {fullHistory}
                 </TextField>
             </div>
+        </div>
+        <div>
+            <Button variant="contained" onClick={handleClick}>Отримати та вирішити приклади</Button>
         </div>
     </div>);
 }
